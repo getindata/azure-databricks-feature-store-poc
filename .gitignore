@@ -1,0 +1,3 @@
+aad_token.txt
+.terraform*
+terraform.tfstate*
