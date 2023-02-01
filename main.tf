@@ -21,9 +21,15 @@ provider "azurerm" {
   }
 }
 
+resource "azurerm_resource_group" "rg" {
+  name     = var.resource_group
+  location = "West Europe"
+}
+
+
 provider "databricks" {
   host  = azurerm_databricks_workspace.dbx.workspace_url
-  token = trimsuffix(data.local_file.aad_token_file.content, "\r\n")
+  token = trimsuffix(data.local_sensitive_file.aad_token_file.content, "\r\n")
 }
 
 data "local_sensitive_file" "aad_token_file" {
@@ -236,9 +242,9 @@ resource "databricks_job" "run-online-fs-wine-example" {
     num_workers   = 1
     spark_version = "11.2.x-cpu-ml-scala2.12"
     node_type_id  = "Standard_F4"
-  }
-  spark_conf = {
+    spark_conf = {
     format("fs.azure.account.key.%s.dfs.core.windows.net", azurerm_storage_account.adls2.name) = azurerm_storage_account.adls2.primary_access_key
+  }
   }
   notebook_task {
     notebook_path = databricks_notebook.online-fs-wine-example.path
